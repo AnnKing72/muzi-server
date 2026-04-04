@@ -15,7 +15,7 @@ def stream():
             "cookiefile": "cookies.txt",
             "extractor_args": {
                 "youtube": {
-                    "player_client": ["ios"],
+                    "player_client": ["web"],
                 }
             },
         }
