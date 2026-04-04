@@ -10,7 +10,7 @@ def stream():
         return jsonify({"error": "Missing id"}), 400
     try:
         opts = {
-            "format": "bestaudio[ext=m4a]/bestaudio/best",
+            "format": "bestaudio/best",
             "quiet": True,
             "cookiefile": "cookies.txt",
             "extractor_args": {
