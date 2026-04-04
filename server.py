@@ -12,10 +12,10 @@ def stream():
         opts = {
             "format": "bestaudio[ext=m4a]/bestaudio/best",
             "quiet": True,
+            "cookiefile": "cookies.txt",
             "extractor_args": {
                 "youtube": {
-                    "player_client": ["ios", "tv_embedded"],
-                    "player_skip": ["webpage"],
+                    "player_client": ["ios"],
                 }
             },
         }
