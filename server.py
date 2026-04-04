@@ -9,15 +9,26 @@ def stream():
     if not video_id:
         return jsonify({"error": "Missing id"}), 400
     try:
-        opts = {"format": "bestaudio[ext=m4a]/bestaudio/best", "quiet": True}
+        opts = {
+            "format": "bestaudio[ext=m4a]/bestaudio/best",
+            "quiet": True,
+            "extractor_args": {
+                "youtube": {
+                    "player_client": ["ios", "tv_embedded"],
+                    "player_skip": ["webpage"],
+                }
+            },
+        }
         with yt_dlp.YoutubeDL(opts) as ydl:
-            info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
+            info = ydl.extract_info(
+                f"https://www.youtube.com/watch?v={video_id}", download=False
+            )
             url = info.get("url") or next(
                 (f["url"] for f in info.get("formats", [])
                  if f.get("vcodec") == "none" and f.get("url")), None
             )
             if not url:
-                return jsonify({"error": "No audio URL"}), 400
+                return jsonify({"error": "No audio URL found"}), 400
             return jsonify({"url": url})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
