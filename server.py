@@ -3,8 +3,6 @@ import yt_dlp, os
 
 app = Flask(__name__)
 
-COOKIES_FILE = "cookies.txt"
-
 @app.route("/stream")
 def stream():
     video_id = request.args.get("id")
@@ -15,9 +13,6 @@ def stream():
             "format": "bestaudio/best",
             "quiet": True,
         }
-        if os.path.exists(COOKIES_FILE):
-            opts["cookiefile"] = COOKIES_FILE
-
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(
                 f"https://www.youtube.com/watch?v={video_id}", download=False
