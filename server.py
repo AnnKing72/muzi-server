@@ -3,6 +3,8 @@ import yt_dlp, os
 
 app = Flask(__name__)
 
+COOKIES_FILE = "cookies.txt"
+
 @app.route("/stream")
 def stream():
     video_id = request.args.get("id")
@@ -10,28 +12,23 @@ def stream():
         return jsonify({"error": "Missing id"}), 400
     try:
         opts = {
+            "format": "bestaudio/best",
             "quiet": True,
-            "cookiefile": "cookies.txt",
-            "skip_download": True,
         }
+        if os.path.exists(COOKIES_FILE):
+            opts["cookiefile"] = COOKIES_FILE
+
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(
                 f"https://www.youtube.com/watch?v={video_id}", download=False
             )
-            formats = info.get("formats", [])
-
-            # 音訊專用格式（無視訊）
-            audio_only = [f for f in formats if f.get("vcodec") == "none" and f.get("url")]
-            # 備選：任何有 url 的格式
-            any_fmt = [f for f in formats if f.get("url")]
-
-            candidates = audio_only if audio_only else any_fmt
-            if not candidates:
-                return jsonify({"error": f"No formats found. Total formats: {len(formats)}"}), 400
-
-            candidates.sort(key=lambda f: f.get("abr") or f.get("tbr") or 0, reverse=True)
-            best = candidates[0]
-            return jsonify({"url": best["url"], "ext": best.get("ext", ""), "abr": best.get("abr")})
+            url = info.get("url") or next(
+                (f["url"] for f in info.get("formats", [])
+                 if f.get("vcodec") == "none" and f.get("url")), None
+            )
+            if not url:
+                return jsonify({"error": "No audio URL"}), 400
+            return jsonify({"url": url})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
